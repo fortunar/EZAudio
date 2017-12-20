@@ -312,7 +312,14 @@ static OSStatus EZAudioMicrophoneCallback(void                       *inRefCon,
             AVAudioSessionInterruptionOptions option = [notification.userInfo[AVAudioSessionInterruptionOptionKey] unsignedIntegerValue];
             if (option == AVAudioSessionInterruptionOptionShouldResume)
             {
-                [self startFetchingAudio];
+                NSError *error;
+                bool success = [[AVAudioSession sharedInstance] setActive:YES error:&error];
+                if (success) {
+                    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 1);
+                    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+                        [self startFetchingAudio];
+                    });
+                }
             }
             break;
         }
